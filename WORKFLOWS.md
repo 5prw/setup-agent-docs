@@ -1,13 +1,19 @@
 # Agent Operational Workflows
 
-Agents MUST use these exact commands when running autonomous verification steps.
+Agents working on this repository MUST use these exact verification and quality commands.
 
 ## Verification & Quality Gates
-- Run Unit Tests: `make test` || `npm test` || `go test ./...`
-- Run Single Test: `npm test -- -t "TestName"` || `go test -run TestName ./...`
-- Lint & Type Check: `make lint` || `npm run lint` || `golangci-lint run`
-- Build / Compilation: `make build` || `tsc --noEmit` || `go build ./...`
+- Shell Script Linting: `shellcheck setup-agent-docs.sh`
+- Format Check: `shfmt -d -i 2 -ci setup-agent-docs.sh` (or apply fixes with `shfmt -w -i 2 -ci setup-agent-docs.sh`)
+- Syntax Validation: `bash -n setup-agent-docs.sh`
+- End-to-End Test Suite: `bash tests/test-scaffold.sh`
 
-## Local Environment & Migrations
-- Start Dependencies: `docker compose up -d`
-- Apply Migrations: `make migrate`
+## Local Development & Testing
+- Test in a clean temporary git repo:
+  ```bash
+  TMP_DIR=$(mktemp -d) && git -C "$TMP_DIR" init && cp setup-agent-docs.sh "$TMP_DIR/" && (cd "$TMP_DIR" && ./setup-agent-docs.sh) && rm -rf "$TMP_DIR"
+  ```
+- Check broken symlinks in repo:
+  ```bash
+  find . -xtype l
+  ```

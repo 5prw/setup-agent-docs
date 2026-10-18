@@ -1,17 +1,24 @@
 # System Architecture & Technical Context
 
 ## 1. Overview
-Brief 2-3 sentence overview of the system domain, business objectives, and high-level stack.
+`setup-agent-docs` is a zero-dependency, tool-agnostic POSIX/Bash automation utility. Its sole responsibility is scaffolding structured AI agent governance documents (`AGENTS.md`, `ARCHITECTURE.md`, `CONVENTIONS.md`, `WORKFLOWS.md`, `MEMORY.md`) and setting up deterministic symlinks for various coding agent harnesses (Claude Code, Google Antigravity, GitHub Copilot, Cursor, Windsurf, Kiro).
 
 ## 2. System Invariants & Hard Boundaries (Non-Negotiable)
-1. Layer Isolation: Domain logic must remain pure and never depend directly on presentation frameworks or database driver details.
-2. Data Integrity: Zero hard deletes on core business entities; state transitions must be audited and idempotent.
-3. Concurrency & State: Core API nodes must remain stateless; cross-process synchronization must rely on dedicated storage locks or message queues.
+1. Zero Runtime Dependencies: The tool must only require standard POSIX utilities, modern Bash (>= 4.0), and Git. No external binaries, Python, or Node runtimes required to scaffold.
+2. Strict Idempotency: Running the script multiple times on the same workspace must never overwrite existing human modifications or corrupt existing configs.
+3. Relative Symlink Integrity: All created symlinks must use relative targets (e.g. `../AGENTS.md` instead of absolute filesystem paths) to guarantee portability across Git clones, Docker containers, WSL, and different OS environments.
+4. Non-Destructive Memory: The initialization process must never blank out an existing `MEMORY.md`.
 
-## 3. Data & Request Flow
-- Request Entrypoint -> Router/Transport Handler -> Domain Service / Use Case -> Repository / Storage Adapter -> External Services.
+## 3. Data & Execution Flow
+- Invocation Entrypoint (`setup-agent-docs.sh`)
+  -> Detect repository root via `git rev-parse --show-toplevel` (fallback to `pwd`)
+  -> Verify/safely initialize core documents with safe checks
+  -> Create directory tree (`.agents/memory/`, `.agents/workflows/`)
+  -> Create relative symlinks for supported AI harnesses (`CLAUDE.md`, `.antigravity/rules.md`, etc.)
+  -> Print deterministic status report and exit cleanly.
 
-## 4. Core Infrastructure & Dependencies
-- Primary Storage: [e.g., PostgreSQL / SQLite with vector extensions]
-- Message Broker / Event Bus: [e.g., Kafka / NATS / Redis Streams]
-- Observability: [e.g., OpenTelemetry, structured logging with correlation IDs]
+## 4. Supported Tool Bridges
+- Claude Code: `CLAUDE.md` -> `AGENTS.md`
+- Google Antigravity: `.antigravity/rules.md` -> `../AGENTS.md`
+- GitHub Copilot: `.github/copilot-instructions.md` -> `../AGENTS.md`
+- Cursor / Windsurf / Kiro: `.cursorrules` -> `AGENTS.md`
