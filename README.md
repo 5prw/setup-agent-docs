@@ -34,7 +34,7 @@ This repository is self-hosted: the root files (`AGENTS.md`, `ARCHITECTURE.md`, 
 ├── MEMORY.md                  # Compact runtime memory (max 100 lines)
 ├── .agents/
 │   ├── memory/                # Domain-specific long-term memory (database, infra)
-│   └── workflows/             # Maintenance playbooks (e.g., compact-memory.md)
+│   └── workflows/             # Maintenance playbooks (e.g., compact-memory.md, bootstrap-context.md)
 ├── CLAUDE.md                  # Symlink -> AGENTS.md (Claude Code)
 ├── .github/
 │   └── copilot-instructions.md# Symlink -> ../AGENTS.md (GitHub Copilot)
@@ -49,7 +49,7 @@ This repository is self-hosted: the root files (`AGENTS.md`, `ARCHITECTURE.md`, 
 
 ### Installation via Curl
 
-Run this directly inside the root of your target Git repository:
+Run this directly inside the root of your target Git repository (works for both brand-new and established codebases):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/5prw/setup-agent-docs/main/setup-agent-docs.sh | bash
@@ -78,10 +78,54 @@ curl -fsSL https://raw.githubusercontent.com/5prw/setup-agent-docs/main/setup-ag
 
 ---
 
-## Customization
+## Post-Setup: Tailoring to Your Codebase
 
-After initialization:
-1. Update `ARCHITECTURE.md` with your system invariants, dependencies, and core request lifecycles.
-2. Adjust `WORKFLOWS.md` with your repository's actual build, test, and linting commands (e.g., `cargo test`, `go test ./...`, `npm run lint`).
-3. Ensure agents update `MEMORY.md` whenever non-trivial edge cases are resolved.
+Right after running `setup-agent-docs.sh` in a new or pre-existing project, prompt your AI agent (Antigravity, Claude Code, Cursor, Copilot, Kiro) with the prompt below to automatically survey the codebase and replace all placeholders with actual project rules:
 
+```text
+Act as a Principal Software Engineer and System Architect.
+
+I have executed `setup-agent-docs.sh` in this workspace. The root directory now contains template governance files: `ARCHITECTURE.md`, `CONVENTIONS.md`, `WORKFLOWS.md`, and `MEMORY.md`.
+
+Your objective is to inspect this codebase and customize each of these files to accurately reflect the real architecture, system boundaries, established conventions, and operational workflows of this project (whether new or pre-existing).
+
+Execute these tasks in order:
+
+1. Repository Reconnaissance:
+   - Identify the primary languages, runtimes, package managers, and core frameworks in use.
+   - Inspect build scripts, Makefiles, Dockerfiles, package manifests (package.json, go.mod, Cargo.toml, pyproject.toml, pom.xml, etc.), and CI/CD pipelines (.github/workflows).
+   - Identify existing test runners, linters, formatters, database migration tools, and scripts.
+
+2. Tailor ARCHITECTURE.md:
+   - Summarize the business/technical purpose and architectural pattern (clean architecture, modular monolith, microservice, event-driven, CLI tool, etc.).
+   - Define concrete system invariants and hard isolation boundaries relevant to this project.
+   - Map the actual request/data lifecycle (entry points, handlers/services, persistence layer, external integrations).
+
+3. Tailor WORKFLOWS.md:
+   - Replace all placeholder commands with the exact commands used in this repository for:
+     * Running the test suite (all tests vs. single targeted test).
+     * Linting and static analysis.
+     * Formatting and compilation / type-checking.
+     * Starting local dependencies and running migrations.
+
+4. Tailor CONVENTIONS.md:
+   - Document the real naming conventions, file layout, and package structure already practiced in the codebase.
+   - Outline strict project-specific error handling, logging, and concurrency patterns.
+   - Detail unit and integration testing patterns adopted by existing tests.
+
+5. Update MEMORY.md:
+   - Clear generic template examples and initialize the active lessons section with any critical quirks, environment variable constraints, or gotchas discovered during your reconnaissance.
+   - Maintain the strict 100-line limit and the format: `[Domain/Module] Failure mode -> Mitigation applied.`
+
+Rules of Engagement:
+- Do NOT modify `AGENTS.md` (keep general behavioral directives intact).
+- Do NOT alter or break existing relative symlinks (`CLAUDE.md`, `.antigravity/rules.md`, `.cursorrules`, etc.).
+- Be terse, concrete, and eliminate placeholder text.
+- Present a concise diff/summary of the changes made to each file once finished.
+```
+
+---
+
+## License
+
+MIT
